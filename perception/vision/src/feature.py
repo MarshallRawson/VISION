@@ -44,6 +44,8 @@ class Feature:
         elif self.shape == "polygon":
             img = self.draw_polygon(img)
         
+        #TODO: make sure text wont write over other text 
+        
         p0 = (int(self.object.points[0].x),int(self.object.points[0].y))
         
         cv2.putText(img,self.object.name,p0, self.font, self.font_scale ,self.color,self.brush,cv2.LINE_AA)

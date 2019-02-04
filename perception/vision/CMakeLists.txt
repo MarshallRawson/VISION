@@ -18,6 +18,9 @@ find_package(catkin REQUIRED COMPONENTS
   cv_bridge
   numpy
   math
+  random
+  sys
+  getopt
 )
 
 ## System dependencies are found with CMake's conventions
