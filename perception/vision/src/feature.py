@@ -3,7 +3,7 @@
 from mil_msgs.msg import ObjectInImage
 from std_msgs.msg import Header
 import cv2
-
+import numpy as np
 
 class Feature:
     def __init__(self, header,object):
@@ -21,7 +21,7 @@ class Feature:
         elif len(self.object_in_image.points)==2:
             self.shape = "rectangle"
         elif len(self.object_in_image.points)>2:
-            self.shape = "poly"
+            self.shape = "polygon"
         
     def draw_on(self, img):
         if self.shape == "none":
@@ -30,8 +30,8 @@ class Feature:
             img = self.draw_point(img)
         elif self.shape == "rectangle":
             img = self.draw_rectangle(img)
-        elif self.shape == "poly":
-            img = self.draw_poly(img)
+        elif self.shape == "polygon":
+            img = self.draw_polygon(img)
         return img
     
     def draw_none(self,img):
@@ -40,23 +40,28 @@ class Feature:
     
     def draw_point(self,img):
         
+        p = (int(self.object_in_image.points[0].x),int(self.object_in_image.points[0].y))
+        
+        img  = cv2.circle(img, p, self.brush, self.color,-1)
+        
         return img
     
     def draw_rectangle(self,img):
-        #img = cv2.rectangle(img, self.object_in_image.points[0],self.object_in_image.points[1],self.color,self.brush)
         p0 = (int(self.object_in_image.points[0].x),int(self.object_in_image.points[0].y))
         p1 = (int(self.object_in_image.points[1].x),int(self.object_in_image.points[1].y))
-        
-        #p1 = (self.object_in_image.points[1].x,self.object_in_image.points[1].y)
-        print(p0)
-        print(p1)
         
         img = cv2.rectangle(img, p0,p1,self.color,self.brush)
         
         return img
     
-    def draw_poly(self,img):
+    def draw_polygon(self,img):
+        p = []
+        for i in self.object_in_image.points:
+            p.append([int(i.x),int(i.y)])
         
+        pts = np.array(p, np.int32)
+        pts = pts.reshape((-1,1,2))
+        img = cv2.polylines(img,[pts],True,self.color,self.brush)
         return img
 
 

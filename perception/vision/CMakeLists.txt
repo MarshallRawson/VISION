@@ -16,6 +16,8 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   cv2
   cv_bridge
+  numpy
+  math
 )
 
 ## System dependencies are found with CMake's conventions

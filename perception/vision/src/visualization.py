@@ -11,6 +11,7 @@ from feature import Feature
 
 class visualization:
     def __init__(self):
+        #Subscribers
         rospy.Subscriber('/camera/front/right/image_raw', Image,self.image_cb)
         rospy.Subscriber('VISION', ObjectsInImage,self.objects_in_image_cb)
         
@@ -19,7 +20,7 @@ class visualization:
         self.bridge = CvBridge()
         
     def image_cb(self, msg):
-        print('visualization:   got image')
+        #print('visualization:   got image')
         
         try:
             cv_image = self.bridge.imgmsg_to_cv2(msg, "bgr8")
@@ -31,7 +32,7 @@ class visualization:
         cv_image = self.draw_on(cv_image, self.features)
         
         cv2.imshow('image',cv_image)
-        cv2.waitKey(3)
+        cv2.waitKey(1)
 
     
     def draw_on(self, img, features=[]):
@@ -40,6 +41,7 @@ class visualization:
         return img
     
     def cull_features(self,msg, all_features=[]):
+        #TODO something to accomidate nodes which may publish less than once per frame
         curr_features = []
         for i in all_features:
             if i.header.stamp == msg.header.stamp:
@@ -47,7 +49,7 @@ class visualization:
         return curr_features
     
     def objects_in_image_cb(self, objects_in_image):
-        print('visualization:   got objects')
+        #print('visualization:   got objects')
         for i in objects_in_image.objects:
             self.features.append(Feature(objects_in_image.header,i))
 
