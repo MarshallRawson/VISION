@@ -64,7 +64,11 @@ class ex_cv:
             theta = theta+((pi*2)/len(strange.points))
             i = i+1
         
-        self.objects_in_image.objects = [box, spot, strange]
+        in_here_somewhere = ObjectInImage()
+        
+        in_here_somewhere.name = "in here somewhere"
+        
+        self.objects_in_image.objects = [box, spot, strange, in_here_somewhere]
         self.pub.publish(self.objects_in_image)
 
 if __name__ == '__main__':
