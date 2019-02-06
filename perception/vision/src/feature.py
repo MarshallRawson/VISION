@@ -8,14 +8,6 @@ from mil_msgs.msg import Point2D
 
 class Feature:
     def __init__(self, header,object_in_image, color = (0,255,0), brush = 3, font = cv2.FONT_HERSHEY_SIMPLEX, font_scale=1, *args, **kwargs):
-        '''
-        super.__init__(object_in_image)
-        
-        super.name  = object_in_image.name
-        super.points = object_in_image.points
-        super.confidence = object_in_image.confidence
-        super.attributes = object_in_image.attributes
-        '''
         
         self.header = header
         self.object = object_in_image

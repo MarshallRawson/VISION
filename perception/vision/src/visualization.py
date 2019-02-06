@@ -29,6 +29,8 @@ class visualization:
         
         self.disco = disco
         
+        print(self.disco)
+        
         self.colors = self.color_gen(64)
         
         self.minus = minus
@@ -56,15 +58,19 @@ class visualization:
     def update_features(self,msg, all_features=[]):
         #TODO: something to accomidate nodes which may publish less than once per frame
         curr_features = []
-        
         if self.minus!=[]:
             for i in all_features:
                 if (i.header.stamp == msg.header.stamp) and (i.object.name not in self.minus):
                     curr_features.append(i)
+        
         elif self.only !=[]:
             for i in all_features:
                     if (i.header.stamp == msg.header.stamp) and (i.object.name in self.only):
                         curr_features.append(i)
+        else:
+            for i in all_features:
+                if (i.header.stamp == msg.header.stamp):
+                    curr_features.append(i)
         curr_features.sort(key = lambda x: x.object.name)
         
         if self.disco == True:
@@ -97,8 +103,8 @@ if __name__ == '__main__':
     parser.add_argument('-o','--only')
     args = parser.parse_args()
     kwargs = {}
-    if args.disco!=None:
-        kwargs.update({'disco':args.disco})
+    if args.disco=='True':
+        kwargs.update({'disco':True})
     if args.minus!=None:
         kwargs.update({'minus':args.minus})
     if args.only!=None:
