@@ -8,6 +8,7 @@ from mil_msgs.msg import Point2D
 from sensor_msgs.msg import Image
 import cv2
 from math import cos, sin, pi
+from random import shuffle
 
 class ex_cv:
     def __init__(self):
@@ -69,6 +70,7 @@ class ex_cv:
         in_here_somewhere.name = "in here somewhere"
         
         self.objects_in_image.objects = [box, spot, strange, in_here_somewhere]
+        shuffle (self.objects_in_image.objects)
         self.pub.publish(self.objects_in_image)
 
 if __name__ == '__main__':

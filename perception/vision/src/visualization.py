@@ -13,7 +13,10 @@ from random import randint
 import argparse
 
 class visualization:
-    def __init__(self, disco = False, **kwargs):
+    def __init__(self, disco = False, minus = [], only = [],**kwargs):
+        
+        assert not (only != [] and minus !=[])
+        
         #Subscribers
         #TODO: utilize image sub tools so dont need hard coded image topic name
         rospy.Subscriber('/camera/front/right/image_raw', Image,self.image_cb)
@@ -28,9 +31,10 @@ class visualization:
         
         self.colors = self.color_gen(64)
         
+        self.minus = minus
+        self.only = only
         
     def image_cb(self, msg):
-        #print('visualization:   got image')
         
         try:
             cv_image = self.bridge.imgmsg_to_cv2(msg, "bgr8")
@@ -51,13 +55,17 @@ class visualization:
     
     def update_features(self,msg, all_features=[]):
         #TODO: something to accomidate nodes which may publish less than once per frame
-        
         curr_features = []
-        for i in all_features:
-            if i.header.stamp == msg.header.stamp:
-                curr_features.append(i)
         
-        #TODO: order features by name if seems nessesary?
+        if self.minus!=[]:
+            for i in all_features:
+                if (i.header.stamp == msg.header.stamp) and (i.object.name not in self.minus):
+                    curr_features.append(i)
+        elif self.only !=[]:
+            for i in all_features:
+                    if (i.header.stamp == msg.header.stamp) and (i.object.name in self.only):
+                        curr_features.append(i)
+        curr_features.sort(key = lambda x: x.object.name)
         
         if self.disco == True:
             self.colors = []
@@ -71,14 +79,12 @@ class visualization:
         return curr_features
     
     def color_gen(self, n):
-        #TODO: needs to make colors more vibrant, right now they are all kinda grey
         c = []
         for i in range(n):
             c.append((randint(0,255),randint(0,255),randint(0,255)))
         return c
     
     def objects_in_image_cb(self, objects_in_image):
-        #print('visualization:   got objects')
         for i in objects_in_image.objects:
             self.features.append(Feature(header = objects_in_image.header,object_in_image = i))
 
@@ -86,11 +92,18 @@ class visualization:
 if __name__ == '__main__':
     rospy.init_node('visualization', anonymous=False)
     parser = argparse.ArgumentParser()
-    parser.add_argument('--disco')
+    parser.add_argument('-d', '--disco')
+    parser.add_argument('-m','--minus')
+    parser.add_argument('-o','--only')
     args = parser.parse_args()
     kwargs = {}
-    if args.disco:
-        kwargs.update({'disco':True})
+    if args.disco!=None:
+        kwargs.update({'disco':args.disco})
+    if args.minus!=None:
+        kwargs.update({'minus':args.minus})
+    if args.only!=None:
+        kwargs.update({'only':args.only})
+    
     
     visualization = visualization(**kwargs)
     rospy.spin()
