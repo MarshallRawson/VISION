@@ -83,6 +83,18 @@ class Feature:
         img = cv2.polylines(img,[pts],True,self.color,self.brush)
         return img
     
+    def centroid(self):
+        x=0
+        y=0
+        if len(self.object.points) != 0:
+            n=0
+            for i in self.object.points:
+                x+=i.x
+                y+=i.y
+                n+=1
+            x = int(x/n)
+            y = int(y/n)
+        return [x,y]
     
 
 

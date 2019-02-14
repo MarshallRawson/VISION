@@ -1,8 +1,12 @@
 #!/usr/bin/env python
 
 import rospy
+
 from mil_msgs.msg import ObjectsInImage
 from mil_msgs.msg import ObjectInImage
+#from mil_msgs import Point2D
+from mil_vision_tools import CentroidObjectsTracker
+
 from sensor_msgs.msg import Image
 import cv2
 from cv_bridge import CvBridge, CvBridgeError
@@ -29,21 +33,22 @@ class visualization:
         
         self.disco = disco
         
-        print(self.disco)
-        
         self.colors = self.color_gen(64)
         
         self.minus = minus
         self.only = only
         
+        self.tracker = CentroidObjectsTracker(max_distance=20.0)
+        
     def image_cb(self, msg):
+        
+        self.features = self.update_features(msg, self.features)
         
         try:
             cv_image = self.bridge.imgmsg_to_cv2(msg, "bgr8")
         except CvBridgeError as e:
             print(e)
         
-        self.features = self.update_features(msg, self.features)
         
         cv_image = self.draw_on(cv_image, self.features)
         
@@ -56,21 +61,28 @@ class visualization:
         return img
     
     def update_features(self,msg, all_features=[]):
-        #TODO: something to accomidate nodes which may publish less than once per frame
+        
+        persistent = self.tracker.get_persistent_objects(min_observations=8, min_age=rospy.Duration(0))
+        
         curr_features = []
+        
+        for i in persistent:
+            curr_features.append(i.data)
+        
+        #print"persistent: ", len(persistent)
+        #print"curr_features: ", len(curr_features)
+        
+        
         if self.minus!=[]:
-            for i in all_features:
-                if (i.header.stamp == msg.header.stamp) and (i.object.name not in self.minus):
-                    curr_features.append(i)
+            for i in curr_features:
+                if (i.object.name in self.minus):
+                    curr_features.remove(i)
         
         elif self.only !=[]:
-            for i in all_features:
-                    if (i.header.stamp == msg.header.stamp) and (i.object.name in self.only):
-                        curr_features.append(i)
-        else:
-            for i in all_features:
-                if (i.header.stamp == msg.header.stamp):
-                    curr_features.append(i)
+            for i in curr_features:
+                if (i.object.name not in self.only):
+                    curr_features.remove(i)
+        
         curr_features.sort(key = lambda x: x.object.name)
         
         if self.disco == True:
@@ -89,10 +101,13 @@ class visualization:
         for i in range(n):
             c.append((randint(0,255),randint(0,255),randint(0,255)))
         return c
-    
+
     def objects_in_image_cb(self, objects_in_image):
+        self.tracker.clear_expired(now=objects_in_image.header.stamp)
+        
         for i in objects_in_image.objects:
-            self.features.append(Feature(header = objects_in_image.header,object_in_image = i))
+            f = Feature(header = objects_in_image.header,object_in_image = i)
+            obj = self.tracker.add_observation(objects_in_image.header.stamp, np.array(f.centroid()), data=f)
 
 
 if __name__ == '__main__':
