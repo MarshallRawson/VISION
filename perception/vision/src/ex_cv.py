@@ -18,10 +18,10 @@ class ex_cv:
         #ie: 30 = 1/30 chance
         
         
-        self.box_chance = 1
-        self.spot_chance = 1
-        self.strange_chance = 1
-        self.in_here_somewhere_chance = 1
+        self.box_chance = rospy.get_param("box")
+        self.spot_chance = rospy.get_param("spot")
+        self.strange_chance = rospy.get_param("strange")
+        self.in_here_somewhere_chance = rospy.get_param("in_here_somewhere")
         
         
     def image_cb(self, msg):

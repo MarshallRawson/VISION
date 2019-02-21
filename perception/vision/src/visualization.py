@@ -14,7 +14,8 @@ import numpy as np
 from numpy import uint8
 from overlay import Overlay
 from random import randint
-import argparse
+import sys
+import ast
 
 class visualization:
     def __init__(self, disco = False, minus = [], only = [],**kwargs):
@@ -22,8 +23,7 @@ class visualization:
         assert not (only != [] and minus !=[])
         
         #Subscribers
-        #TODO: utilize image sub tools so dont need hard coded image topic name
-        rospy.Subscriber('/camera/front/right/image_raw', Image,self.image_cb)
+        rospy.Subscriber(rospy.get_param("camera_feed"), Image,self.image_cb)
         
         rospy.Subscriber('tracked_objects', ObjectsInImage, self.tracked_objects_cb)
         
@@ -43,7 +43,6 @@ class visualization:
         if tracked_objects.header.stamp == self.image.header.stamp:
             self.overlays = []
             self.overlays = [Overlay(header = tracked_objects.header, object_in_image = i) for i in tracked_objects.objects]
-        
         
     def image_cb(self, msg):
         
@@ -101,28 +100,18 @@ class visualization:
             c.append((randint(0,255),randint(0,255),randint(0,255)))
         return c
 
-    def objects_in_image_cb(self, objects_in_image):
-        self.tracker.clear_expired(now=objects_in_image.header.stamp)
-        
-        for i in objects_in_image.objects:
-            f = Feature(header = objects_in_image.header,object_in_image = i)
-            obj = self.tracker.add_observation(objects_in_image.header.stamp, np.array(f.centroid()), data=f)
 
 
 if __name__ == '__main__':
     rospy.init_node('visualization', anonymous=False)
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-d', '--disco')
-    parser.add_argument('-m','--minus')
-    parser.add_argument('-o','--only')
-    args = parser.parse_args()
+    
     kwargs = {}
-    if args.disco=='True':
-        kwargs.update({'disco':True})
-    if args.minus!=None:
-        kwargs.update({'minus':args.minus})
-    if args.only!=None:
-        kwargs.update({'only':args.only})
+    
+    kwargs.update({'disco':rospy.get_param("disco")})
+    
+    kwargs.update({'minus':ast.literal_eval(rospy.get_param("minus"))})
+    
+    kwargs.update({'only':ast.literal_eval(rospy.get_param("only"))})
     
     
     visualization = visualization(**kwargs)

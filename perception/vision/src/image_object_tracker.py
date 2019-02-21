@@ -29,7 +29,7 @@ class image_object_tracker:
         persistent = self.tracker.get_persistent_objects(min_observations=8, min_age=rospy.Duration(0))
         objects_in_image = ObjectsInImage()
         objects_in_image.header = msg.header
-        objects_in_image.objects = [i.data.object for i in persistent] 
+        objects_in_image.objects = [i.data for i in persistent] 
         self.pub.publish(objects_in_image)
         
         
@@ -37,8 +37,21 @@ class image_object_tracker:
         self.tracker.clear_expired(now=objects_in_image.header.stamp)
         
         for i in objects_in_image.objects:
-            o = Overlay(header = objects_in_image.header,object_in_image = i)
-            obj = self.tracker.add_observation(objects_in_image.header.stamp, np.array(o.centroid()), data=o)
+            obj = self.tracker.add_observation(objects_in_image.header.stamp, np.array(self.centroid(i)), data=i)
+            
+            
+    def centroid(self, object_in_image):
+        x=0
+        y=0
+        if len(object_in_image.points) != 0:
+            n=0
+            for i in object_in_image.points:
+                x+=i.x
+                y+=i.y
+                n+=1
+            x = int(x/n)
+            y = int(y/n)
+        return [x,y]
     
 if __name__ == '__main__':
     rospy.init_node('image_object_tracker', anonymous = False)
