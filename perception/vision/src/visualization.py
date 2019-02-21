@@ -11,7 +11,6 @@ from sensor_msgs.msg import Image
 import cv2
 from cv_bridge import CvBridge, CvBridgeError
 import numpy as np
-from numpy import uint8
 from overlay import Overlay
 from random import randint
 import sys
@@ -109,9 +108,21 @@ if __name__ == '__main__':
     
     kwargs.update({'disco':rospy.get_param("disco")})
     
-    kwargs.update({'minus':ast.literal_eval(rospy.get_param("minus"))})
     
-    kwargs.update({'only':ast.literal_eval(rospy.get_param("only"))})
+    minus = rospy.get_param("minus").split(",")
+    
+    for i in minus:
+        if i == '':
+            minus.remove(i)
+    
+    kwargs.update({'minus':minus})
+    
+    only = rospy.get_param("only").split(",")
+    
+    for i in only:
+        if i == '':
+            only.remove(i)
+    kwargs.update({'only':only})
     
     
     visualization = visualization(**kwargs)

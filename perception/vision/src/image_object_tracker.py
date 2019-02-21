@@ -29,7 +29,7 @@ class image_object_tracker:
         persistent = self.tracker.get_persistent_objects(min_observations=8, min_age=rospy.Duration(0))
         objects_in_image = ObjectsInImage()
         objects_in_image.header = msg.header
-        objects_in_image.objects = [i.data for i in persistent] 
+        objects_in_image.objects = [i.data for i in persistent]
         self.pub.publish(objects_in_image)
         
         
