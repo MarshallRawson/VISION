@@ -69,8 +69,6 @@ class Feature:
         
         img = cv2.rectangle(img, p0,p1,self.color,self.brush)
         
-        
-        
         return img
     
     def draw_polygon(self,img):

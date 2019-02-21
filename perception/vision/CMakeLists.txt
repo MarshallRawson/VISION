@@ -7,20 +7,13 @@ project(vision)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS
-  cv2
+find_package(catkin
+  REQUIRED COMPONENTS
   mil_msgs
   roscpp
   rospy
   std_msgs
   sensor_msgs
-  cv2
-  cv_bridge
-  numpy
-  math
-  random
-  sys
-  getopt
 )
 
 ## System dependencies are found with CMake's conventions
