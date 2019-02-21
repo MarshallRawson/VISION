@@ -8,8 +8,6 @@ import cv2
 from math import cos, sin, pi
 from random import shuffle, randint
 
-import ast
-
 class ex_cv:
     def __init__(self):
         rospy.Subscriber('/camera/front/right/image_raw', Image,self.image_cb)
@@ -17,17 +15,14 @@ class ex_cv:
         self.objects_in_image = ObjectsInImage()
         
         #recipricol chance that each shape will be detected in any given frame...
-        #ie: 30 => 1/30 chance
-        '''
-        self.box_chance = rospy.get_param("box")
-        self.spot_chance = rospy.get_param("spot")
-        self.strange_chance = rospy.get_param("strange")
-        self.in_here_somewhere_chance = rospy.get_param("in_here_somewhere")
-        '''
+        #ie: 30 = 1/30 chance
+        
+        
         self.box_chance = 1
         self.spot_chance = 1
         self.strange_chance = 1
         self.in_here_somewhere_chance = 1
+        
         
     def image_cb(self, msg):
         #print('ex_cv:   got image')
@@ -95,6 +90,7 @@ class ex_cv:
         
         #self.objects_in_image.objects = [box, spot, strange, in_here_somewhere]
         
+        #print len(self.objects_in_image.objects)
         
         shuffle (self.objects_in_image.objects)
         self.pub.publish(self.objects_in_image)
@@ -105,6 +101,7 @@ if __name__ == '__main__':
     rospy.init_node('ex_cv', anonymous=True)
     ex_cv = ex_cv()
     rospy.spin()
+
 
 
 

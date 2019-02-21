@@ -9,8 +9,7 @@ from sensor_msgs.msg import Image
 import cv2
 from cv_bridge import CvBridge, CvBridgeError
 import numpy as np
-from numpy import uint8
-from feature import Feature
+from overlay import Overlay
 
 #currently tracks objects with centroid...should use something better or be configurable
 class image_object_tracker:
@@ -18,32 +17,28 @@ class image_object_tracker:
         
         #Subscribers
         
-        #i = Overlay(header = None, object_in_image = None)
-        
         rospy.Subscriber("/camera/front/right/image_raw", Image, self.image_cb)
         
-        rospy.Subscriber('VISION', ObjectsInImage,self.objs_cb)
+        rospy.Subscriber('VISION', ObjectsInImage,self.objects_in_image_cb)
         
-        self.pub = rospy.Publisher('tracked_overlays', Feature, queue_size = 1)
+        self.pub = rospy.Publisher('tracked_objects', ObjectsInImage, queue_size = 1)
         
         self.tracker = CentroidObjectsTracker(max_distance=20.0)
         
-        self.persistent=[]
-        
-        
     def image_cb(self, msg):
-         self.persistent = self.tracker.get_persistent_objects(min_observations=8, min_age=rospy.Duration(0))
+        persistent = self.tracker.get_persistent_objects(min_observations=8, min_age=rospy.Duration(0))
+        objects_in_image = ObjectsInImage()
+        objects_in_image.header = msg.header
+        objects_in_image.objects = [i.data.object for i in persistent] 
+        self.pub.publish(objects_in_image)
         
-         self.pub.publish(self.persistent)
         
+    def objects_in_image_cb(self, objects_in_image):
+        self.tracker.clear_expired(now=objects_in_image.header.stamp)
         
-    def objs_cb(self, objs):
-        self.tracker.clear_expired(now = objs.header.stamp)
-        
-        for i in objs.objects:
-            o = Overlay(header = objs.header,object_in_image = i)
-            obj = self.tracker.add_observation(objs.header.stamp, np.array(o.centroid()), data=o)
-
+        for i in objects_in_image.objects:
+            o = Overlay(header = objects_in_image.header,object_in_image = i)
+            obj = self.tracker.add_observation(objects_in_image.header.stamp, np.array(o.centroid()), data=o)
     
 if __name__ == '__main__':
     rospy.init_node('image_object_tracker', anonymous = False)

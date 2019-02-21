@@ -6,7 +6,7 @@ import cv2
 import numpy as np
 from mil_msgs.msg import Point2D
 
-class Feature:
+class Overlay:
     def __init__(self, header,object_in_image, color = (0,255,0), brush = 3, font = cv2.FONT_HERSHEY_SIMPLEX, font_scale=1, *args, **kwargs):
         
         self.header = header
@@ -94,6 +94,7 @@ class Feature:
             y = int(y/n)
         return [x,y]
     
+
 
 
 
