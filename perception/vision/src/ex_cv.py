@@ -59,15 +59,15 @@ class ex_cv:
         
         strange.points = [None]*9
         
-        center = [(msg.width/2)+50,(msg.height/2)+50]
+        center = [(msg.width/2)+randint(0,50),(msg.height/2)+randint(0,50)]
         
         theta=0
         i=0
-        r = 100
+        r = randint(90,100)
         while i<len(strange.points):
             strange.points[i]=Point2D()
-            strange.points[i].x = (100* cos(theta))+center[0]
-            strange.points[i].y = (100* sin(theta))+center[1]
+            strange.points[i].x = (r* cos(theta))+center[0]
+            strange.points[i].y = (r* sin(theta))+center[1]
             
             theta = theta+((pi*2)/len(strange.points))
             i = i+1

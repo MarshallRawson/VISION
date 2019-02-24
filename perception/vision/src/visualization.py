@@ -24,7 +24,7 @@ class visualization:
         #Subscribers
         rospy.Subscriber(rospy.get_param("camera_feed"), Image,self.image_cb)
         
-        rospy.Subscriber('tracked_objects', ObjectsInImage, self.tracked_objects_cb)
+        rospy.Subscriber('persistent_objects_in_image', ObjectsInImage, self.tracked_objects_cb)
         
         self.image = Image()
         self.overlays = []

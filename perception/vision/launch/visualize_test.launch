@@ -20,16 +20,14 @@
 
 <node pkg="vision" type="image_object_tracker.py" name="image_object_tracker" output="screen"/>
 
-//run ex_cv for validation:
-
 
 <param name = "box"               value = "1" type = "int"/>
 <param name = "spot"              value = "1" type = "int"/>
 <param name = "strange"           value = "1" type = "int"/>
 <param name = "in_here_somewhere" value = "1" type = "int"/>
 
+
 <node pkg="vision" type = "ex_cv.py" name="ex_cv" output="screen"/>
-//params for ex_cv to sim randomness
 
 
-</launch
+</launch>
