@@ -23,6 +23,12 @@ class ex_cv:
         self.strange_chance = rospy.get_param("strange")
         self.in_here_somewhere_chance = rospy.get_param("in_here_somewhere")
         
+        self.width = 1920
+        self.height = 1080
+        
+        self.center = [(self.width/2), (self.height/2)]
+        self.r = 100
+        
         
     def image_cb(self, msg):
         #print('ex_cv:   got image')
@@ -59,15 +65,16 @@ class ex_cv:
         
         strange.points = [None]*9
         
-        center = [(msg.width/2)+randint(0,50),(msg.height/2)+randint(0,50)]
+        self.center[0] += randint(-25,25)
+        self.center[1] += randint(-25,25)
         
         theta=0
         i=0
-        r = randint(90,100)
+        self.r += randint(-10,10)
         while i<len(strange.points):
             strange.points[i]=Point2D()
-            strange.points[i].x = (r* cos(theta))+center[0]
-            strange.points[i].y = (r* sin(theta))+center[1]
+            strange.points[i].x = (self.r* cos(theta))+self.center[0]
+            strange.points[i].y = (self.r* sin(theta))+self.center[1]
             
             theta = theta+((pi*2)/len(strange.points))
             i = i+1
