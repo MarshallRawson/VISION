@@ -17,14 +17,15 @@
 //run visualization:
 <node pkg="vision" type="visualization.py" name="visualization" output="screen"/>
 
+<param name = "maxdistance" value = "40.0" type = "float"/>
 
 <node pkg="vision" type="image_object_tracker.py" name="image_object_tracker" output="screen"/>
 
 
-<param name = "box"               value = "1" type = "int"/>
-<param name = "spot"              value = "1" type = "int"/>
-<param name = "strange"           value = "1" type = "int"/>
-<param name = "in_here_somewhere" value = "1" type = "int"/>
+<param name = "box"               value = "2" type = "int"/>
+<param name = "spot"              value = "2" type = "int"/>
+<param name = "strange"           value = "2" type = "int"/>
+<param name = "in_here_somewhere" value = "2" type = "int"/>
 
 
 <node pkg="vision" type = "ex_cv.py" name="ex_cv" output="screen"/>

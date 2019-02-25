@@ -3,7 +3,7 @@
 import rospy
 
 from mil_msgs.msg import ObjectsInImage, ObjectInImage
-from mil_vision_tools import CentroidWidthHeightTracker, TrackedObject
+from mil_vision_tools import CentroidWidthHeightTracker
 
 from sensor_msgs.msg import Image
 import cv2
@@ -11,7 +11,7 @@ from cv_bridge import CvBridge, CvBridgeError
 import numpy as np
 from overlay import Overlay
 
-#currently tracks objects with centroid...should use something better or be configurable
+
 class image_object_tracker:
     def __init__(self):
         
@@ -23,9 +23,9 @@ class image_object_tracker:
         
         self.pub = rospy.Publisher('persistent_objects_in_image', ObjectsInImage, queue_size = 1)
         
-        #self.pub = rospy.Publisher('traked_objects', ObjectInImage, queue_size = 1)
         
-        self.tracker = CentroidWidthHeightTracker(max_distance=40.0)
+        
+        self.tracker = CentroidWidthHeightTracker(max_distance=rospy.get_param("max_distance"))
         
     def image_cb(self, msg):
         

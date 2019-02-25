@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 import rospy
 
+from iamge_geometry import PinholeCameraModel
+
+
+
+
 class multialaterater:
     def __init__(self):
         
@@ -11,10 +16,12 @@ class multialaterater:
         
     def objects_in_image_cb(self):
         
-    
-    
-    
-    
+        
+        
+        
+        
+        
+        
 
 
 if __name__ == "__main__":
