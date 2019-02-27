@@ -3,7 +3,7 @@
 import rospy
 
 from mil_msgs.msg import ObjectsInImage, ObjectInImage
-from mil_vision_tools import CentroidWidthHeightTracker
+from mil_vision_tools import CentroidObjectsTracker
 
 from sensor_msgs.msg import Image
 import cv2
@@ -23,13 +23,13 @@ class image_object_tracker:
         
         self.pub = rospy.Publisher('persistent_objects_in_image', ObjectsInImage, queue_size = 1)
         
+        #self.tracker = CentroidWidthHeightTracker(max_distance=rospy.get_param("max_distance"))
+        self.tracker = CentroidObjectsTracker(expiration_seconds = .5, max_distance=10.0)
         
-        
-        self.tracker = CentroidWidthHeightTracker(max_distance=rospy.get_param("max_distance"))
         
     def image_cb(self, msg):
-        
-        persistent = self.tracker.get_persistent_objects(min_observations=8, min_age=rospy.Duration(0))
+        self.tracker.clear_expired(now=msg.header.stamp)
+        persistent = self.tracker.get_persistent_objects(min_observations=12, min_age=rospy.Duration(0))
         objects_in_image = ObjectsInImage()
         objects_in_image.header = msg.header
         objects_in_image.objects = [i.data for i in persistent]
@@ -46,9 +46,10 @@ class image_object_tracker:
     def features(self, object_in_image):
         
         centroid = self.centroid(object_in_image)
-        width_height = self.width_height(object_in_image)
+        #width_height = self.width_height(object_in_image)
         
-        return [centroid[0],centroid[1],width_height[0], width_height[1]]
+        #return [centroid[0],centroid[1],width_height[0], width_height[1]]
+        return [centroid[0],centroid[1]]
         
         
     

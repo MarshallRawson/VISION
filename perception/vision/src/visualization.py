@@ -5,7 +5,6 @@ import rospy
 from mil_msgs.msg import ObjectsInImage
 from mil_msgs.msg import ObjectInImage
 #from mil_msgs import Point2D
-from mil_vision_tools import CentroidObjectsTracker
 
 from sensor_msgs.msg import Image
 import cv2

@@ -1,0 +1,21 @@
+<launch>
+
+<param name = "camera_feed" value="/camera/front/left/image_rect_color" type="string"/>
+
+<arg name = "disco" default = "False"/>
+<param name = "disco"  value= "$(arg disco)" type="bool"/>
+
+<arg name = "minus" default = ""/>
+<param name = "minus"  value= "$(arg minus)" type="string"/>
+
+<arg name = "only" default = ""/>
+<param name = "only"  value= "$(arg only)" type="string"/>
+
+<node pkg="vision" type="visualization.py" name="visualization" output="screen"/>
+
+
+<param name = "maxdistance" value = "40" type = "int"/>
+
+<node pkg="vision" type="image_object_tracker.py" name="image_object_tracker" output="screen"/>
+
+</launch>

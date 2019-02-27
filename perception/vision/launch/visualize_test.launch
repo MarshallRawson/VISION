@@ -14,7 +14,6 @@
 <param name = "only"  value= "$(arg only)" type="string"/>
 
 
-//run visualization:
 <node pkg="vision" type="visualization.py" name="visualization" output="screen"/>
 
 <param name = "maxdistance" value = "40.0" type = "float"/>
