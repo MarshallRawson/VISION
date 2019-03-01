@@ -1,9 +1,13 @@
 #!/usr/bin/env python
+#TODO add smart filter adjuster
+
+
 
 import rospy
 
+
 from mil_msgs.msg import ObjectsInImage, ObjectInImage
-from mil_vision_tools import CentroidObjectsTracker
+from mil_vision_tools import CentroidObjectsTracker, TrackedObject
 
 from sensor_msgs.msg import Image
 import cv2
@@ -21,7 +25,9 @@ class image_object_tracker:
         
         rospy.Subscriber('VISION', ObjectsInImage,self.objects_in_image_cb)
         
-        self.pub = rospy.Publisher('persistent_objects_in_image', ObjectsInImage, queue_size = 1)
+        self.pub_objects_in_image = rospy.Publisher('persistent_objects_in_image', ObjectsInImage, queue_size = 1)
+        
+        self.pub_tracked_objects = rospy.Publisher('tracked_objects', TrackedObject, queue_size = 1)
         
         #self.tracker = CentroidWidthHeightTracker(max_distance=rospy.get_param("max_distance"))
         self.tracker = CentroidObjectsTracker(expiration_seconds = .5, max_distance=10.0)
@@ -33,7 +39,8 @@ class image_object_tracker:
         objects_in_image = ObjectsInImage()
         objects_in_image.header = msg.header
         objects_in_image.objects = [i.data for i in persistent]
-        self.pub.publish(objects_in_image)
+        self.pub_objects_in_image.publish(objects_in_image)
+        self.pub_tracked_objects.publish(persistent)
         
         
     def objects_in_image_cb(self, objects_in_image):

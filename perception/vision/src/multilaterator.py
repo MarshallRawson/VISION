@@ -2,14 +2,15 @@
 import rospy
 
 from iamge_geometry import PinholeCameraModel
+from mil_vision_tools import TrackedObject
 
 
 
 
-class multialaterater:
+class multialaterator:
     def __init__(self):
         
-        rospy.Subscriber('persistent_objects_in_image', ObjectsInImage, self.objects_in_image_cb)
+        rospy.Subscriber('tracked_objects', TrackedObject, self.objects_in_image_cb)
         
         
         
@@ -25,6 +26,6 @@ class multialaterater:
 
 
 if __name__ == "__main__":
-    rospy.init_node("multilaterater", anonymous = False)
+    rospy.init_node("multilaterator", anonymous = False)
     mulitlaterater = multilaterator()
     rospy.spin()
