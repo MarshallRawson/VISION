@@ -14,7 +14,11 @@
 <node pkg="vision" type="visualization.py" name="visualization" output="screen"/>
 
 
-<param name = "maxdistance" value = "40" type = "int"/>
+<param name = "max_distance" value = "10.0"/>
+
+<param name = "expiration_seconds" value = ".5"/>
+
+<param name = "min_observations" value = "12"/>
 
 <node pkg="vision" type="image_object_tracker.py" name="image_object_tracker" output="screen"/>
 

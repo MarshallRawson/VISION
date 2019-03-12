@@ -1,20 +1,18 @@
 #!/usr/bin/env python
 #TODO add smart filter adjuster
 
-
-
 import rospy
 
-
-from mil_msgs.msg import ObjectsInImage, ObjectInImage
-from mil_vision_tools import CentroidObjectsTracker, TrackedObject
-
-from sensor_msgs.msg import Image
 import cv2
+from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
-import numpy as np
-from overlay import Overlay
+import ast
 
+from mil_vision_tools import CentroidObjectsTracker, TrackedObject
+from vision_utils import centroid
+from overlay import Overlay
+from mil_msgs.msg import ObjectsInImage, ObjectInImage
+import numpy as np
 
 class image_object_tracker:
     def __init__(self):
@@ -27,52 +25,37 @@ class image_object_tracker:
         
         self.pub_objects_in_image = rospy.Publisher('persistent_objects_in_image', ObjectsInImage, queue_size = 1)
         
-        self.pub_tracked_objects = rospy.Publisher('tracked_objects', TrackedObject, queue_size = 1)
+        self.tracker = CentroidObjectsTracker(expiration_seconds = rospy.get_param("expiration_seconds"), max_distance=rospy.get_param("max_distance"))
         
-        #self.tracker = CentroidWidthHeightTracker(max_distance=rospy.get_param("max_distance"))
-        self.tracker = CentroidObjectsTracker(expiration_seconds = .5, max_distance=10.0)
         
         
     def image_cb(self, msg):
         self.tracker.clear_expired(now=msg.header.stamp)
-        persistent = self.tracker.get_persistent_objects(min_observations=12, min_age=rospy.Duration(0))
+        persistent = self.tracker.get_persistent_objects(min_observations=rospy.get_param("min_observations"), min_age=rospy.Duration(0))
         objects_in_image = ObjectsInImage()
         objects_in_image.header = msg.header
-        objects_in_image.objects = [i.data for i in persistent]
+        for i in persistent:
+            temp = ast.literal_eval(i.data.attributes)
+            temp["id"] = i.id
+            i.data.attributes = str(temp)
+            objects_in_image.objects.append(i.data)
         self.pub_objects_in_image.publish(objects_in_image)
-        self.pub_tracked_objects.publish(persistent)
         
         
     def objects_in_image_cb(self, objects_in_image):
         self.tracker.clear_expired(now=objects_in_image.header.stamp)
         
         for i in objects_in_image.objects:
-            obj = self.tracker.add_observation(objects_in_image.header.stamp, np.array(self.features(i)), data=i)
+            c = centroid(i)
+            i.attributes = str({"centroid": c})
+            obj = self.tracker.add_observation(objects_in_image.header.stamp, np.array(c), data=i)
             
             
     def features(self, object_in_image):
         
-        centroid = self.centroid(object_in_image)
-        #width_height = self.width_height(object_in_image)
+        c = centroid(object_in_image)
+        return [c[0],c[1]]
         
-        #return [centroid[0],centroid[1],width_height[0], width_height[1]]
-        return [centroid[0],centroid[1]]
-        
-        
-    
-    def centroid(self, object_in_image):
-        x=0
-        y=0
-        if len(object_in_image.points) != 0:
-            n=0
-            for i in object_in_image.points:
-                x+=i.x
-                y+=i.y
-                n+=1
-            x = int(x/n)
-            y = int(y/n)
-        return [x,y]
-    
     
     def width_height(self, object_in_image):
         
@@ -97,8 +80,8 @@ class image_object_tracker:
                 minY = i.x
             
         return [maxX-minX, maxY-minY]
-    
-    
+
+
 if __name__ == '__main__':
     rospy.init_node('image_object_tracker', anonymous = False)
     image_object_tracker = image_object_tracker()
