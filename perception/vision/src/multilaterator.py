@@ -19,7 +19,7 @@ class multilaterator:
         self.young_ids = set() #ids which have only published once and are current so cannot multilaterate
         self.old_ids = set()#ids which have multilaterated at least twice and are current, ids which have not been published in the last persistent_objects_in_image will be discarded
         
-        
+        self.header = rospy.Header()
         
         
         self.camera = "/camera/front/left/image_rect_color"
@@ -29,11 +29,13 @@ class multilaterator:
         
         
     def image_cb(self, msg):
-        
+        self.stamp = msg.Header()
         return
         
     def objects_in_image_cb(self, objects_in_image):
-        
+        if self.header != objects_in_image.header:
+            rospy.logerr("Image publishing and persistent_objects_in_image are out of sync.")
+            return
         current_ids = set(ast.literal_eval(i.attributes)['id'] for i in objects_in_image.objects)
         
         self.old_ids = (current_ids & self.old_ids) | (current_ids & self.young_ids)
@@ -41,8 +43,6 @@ class multilaterator:
         self.young_ids = current_ids - self.old_ids
         
         
-        print"old_ids:"
-        print self.old_ids
         
         
         
