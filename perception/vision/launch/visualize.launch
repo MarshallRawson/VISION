@@ -14,7 +14,7 @@
 <node pkg="vision" type="visualization.py" name="visualization" output="screen"/>
 
 
-<param name = "max_distance" value = "10.0"/>
+<param name = "max_distance" value = "40.0"/>
 
 <param name = "expiration_seconds" value = ".5"/>
 

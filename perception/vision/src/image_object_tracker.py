@@ -19,7 +19,6 @@ class image_object_tracker:
         
         #Subscribers
         
-        rospy.Subscriber(rospy.get_param("camera_feed"), Image, self.image_cb)
         
         rospy.Subscriber('VISION', ObjectsInImage,self.objects_in_image_cb)
         
@@ -28,35 +27,30 @@ class image_object_tracker:
         self.tracker = CentroidObjectsTracker(expiration_seconds = rospy.get_param("expiration_seconds"), max_distance=rospy.get_param("max_distance"))
         
         
+    def objects_in_image_cb(self, unfiltered_objects_in_image):
         
-    def image_cb(self, msg):
-        self.tracker.clear_expired(now=msg.header.stamp)
-        persistent = self.tracker.get_persistent_objects(min_observations=rospy.get_param("min_observations"), min_age=rospy.Duration(0))
-        objects_in_image = ObjectsInImage()
-        objects_in_image.header = msg.header
-        for i in persistent:
-            temp = ast.literal_eval(i.data.attributes)
-            temp["id"] = i.id
-            i.data.attributes = str(temp)
-            objects_in_image.objects.append(i.data)
-        self.pub_objects_in_image.publish(objects_in_image)
-        
-        
-    def objects_in_image_cb(self, objects_in_image):
-        self.tracker.clear_expired(now=objects_in_image.header.stamp)
-        
-        for i in objects_in_image.objects:
+        for i in unfiltered_objects_in_image.objects:
             c = centroid(i)
             i.attributes = str({"centroid": c})
-            obj = self.tracker.add_observation(objects_in_image.header.stamp, np.array(c), data=i)
+            obj = self.tracker.add_observation(unfiltered_objects_in_image.header.stamp, np.array(c), data=i)
             
-            
-    def features(self, object_in_image):
+        self.tracker.clear_expired(now=unfiltered_objects_in_image.header.stamp)
         
-        c = centroid(object_in_image)
-        return [c[0],c[1]]
-        
-    
+        persistent = self.tracker.get_persistent_objects(min_observations=rospy.get_param("min_observations"), min_age=rospy.Duration(0))
+        objects_in_image = ObjectsInImage()
+        objects_in_image.header = unfiltered_objects_in_image.header
+        for i in persistent:
+            attributes = ast.literal_eval(i.data.attributes)
+            attributes["id"] = i.id
+            i.data.attributes = str(attributes)
+            objects_in_image.objects.append(i.data)
+        self.pub_objects_in_image.publish(objects_in_image)
+
+
+
+
+
+     
     def width_height(self, object_in_image):
         
         if len(object_in_image.points) ==0:

@@ -14,6 +14,7 @@ from overlay import Overlay
 from random import randint
 import sys
 import ast
+import Queue
 
 class visualization:
     def __init__(self, disco = False, minus = [], only = [],**kwargs):
@@ -25,7 +26,7 @@ class visualization:
         
         rospy.Subscriber('persistent_objects_in_image', ObjectsInImage, self.tracked_objects_cb)
         
-        self.image = Image()
+        #self.image = Image()
         self.overlays = []
         self.bridge = CvBridge()
         
@@ -35,29 +36,38 @@ class visualization:
         
         self.minus = minus
         self.only = only
+
+        self.image_buffer = Queue.Queue()
         
     def tracked_objects_cb(self, tracked_objects):
+        msg=self.image_buffer.get()
         
-        if tracked_objects.header.stamp == self.image.header.stamp:
-            self.overlays = []
-            self.overlays = [Overlay(header = tracked_objects.header, object_in_image = i) for i in tracked_objects.objects]
-        
-    def image_cb(self, msg):
-        
-        self.image = msg
-        
+        print self.image_buffer.qsize() 
+        while (not self.image_buffer.empty()) and (tracked_objects.header.stamp != msg.header.stamp):
+            if tracked_objects.header.stamp-msg.header.stamp<rospy.Duration(0):
+                return
+            msg=self.image_buffer.get()
+        if self.image_buffer.empty():
+            print"returned early"
+            return
+        self.overlays = [Overlay(header = tracked_objects.header, object_in_image = i) for i in tracked_objects.objects]
         overlays = self.select_overlays(msg, self.overlays)
         
         try:
             cv_image = self.bridge.imgmsg_to_cv2(msg, "bgr8")
         except CvBridgeError as e:
             print(e)
+            return
         
         cv_image = self.draw_on(cv_image, overlays)
         
         cv2.imshow('image',cv_image)
         cv2.waitKey(1)
-    
+
+    def image_cb(self, msg): 
+        self.image_buffer.put(msg)
+        #print"queued new image"
+        
     def draw_on(self, img, overlays=[]):
         for i in overlays:
             img = i.draw_on(img)
