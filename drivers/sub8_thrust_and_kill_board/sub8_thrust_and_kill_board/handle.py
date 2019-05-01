@@ -18,16 +18,16 @@ class ThrusterAndKillBoard(CANDeviceHandle):
         self.kill_listener = AlarmListener('kill', callback_funct=self.on_soft_kill)
         self._hard_kill_broadcaster = AlarmBroadcaster('hw-hard-kill')
         self._soft_kill_broadcaster = AlarmBroadcaster('kill')
-        self._hearbeat_timer = rospy.Timer(rospy.Duration(0.7), self.send_heartbeat)
+        self._hearbeat_timer = rospy.Timer(rospy.Duration(0.4), self.send_heartbeat)
         self._subs = [rospy.Subscriber(thruster, Float64, self.on_command, queue_size=10, callback_args=thruster)
                       for thruster in ThrustPacket.ID_MAPPING]
 
     def send_heartbeat(self, timer):
-        self.send_data(HeartbeatMessage.create().to_bytes())
-
+        self.send_data(HeartbeatMessage.create().to_bytes(), can_id=0x11)
     def on_soft_kill(self, alarm):
-        if self._last_kill is not alarm.raised:
-            self.send_data(KillMessage.create_kill_message(command=True, hard=False, asserted=alarm.raised).to_bytes())
+        print "                  soft kill", alarm.raised
+        #if self._last_kill is not alarm.raised:
+        self.send_data(KillMessage.create_kill_message(command=True, hard=False, asserted=alarm.raised).to_bytes(), can_id=0x11)
         self._last_kill = alarm.raised
 
     def on_command(self, msg, thruster):
@@ -36,6 +36,7 @@ class ThrusterAndKillBoard(CANDeviceHandle):
         self.send_data(packet.to_bytes(), can_id=0x21)
 
     def on_data(self, data):
+        
         if KillMessage.IDENTIFIER == ord(data[0]):
             msg = KillMessage.from_bytes(data)
             if not msg.is_response:
